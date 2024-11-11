@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+   <html>
+   <head>
+       <title>ChatGPT Recipe Recommendation</title>
+   </head>
+   <body>
+       <h1>ChatGPT Recipe Recommendation</h1>
+       <form method="post">
+           <label for="ingredients">Enter the ingredients you have:</label>
+           <textarea id="ingredients" name="ingredients" rows="3"></textarea>
+           <br>
+           <input type="submit" value="Get Recipe">
+       </form>
+       {% if recipe %}
+           <h2>Recommended Recipe:</h2>
+           <p>{{ recipe }}</p>
+       {% endif %}
+   </body>
+   </html>
