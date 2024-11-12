@@ -79,9 +79,9 @@ def get_related_recipes(recipe_title):
     search_query = urllib.parse.quote(f"{recipe_title} recipe")
     
     sites = [
-        ('https://www.allrecipes.com/search?q=', '.card__title-text', 'a.card__titleLink'),
-        ('https://www.food.com/search/', '.title a', 'a.title'),
-        ('https://www.simplyrecipes.com/search?q=', '.card__title', 'a.card__titleLink')
+        # ('https://www.allrecipes.com/search?q=', '.card__title-text', 'a.card__titleLink'),
+        # ('https://www.food.com/search/', '.title a', 'a.title'),
+        ('https://www.simplyrecipes.com/search?q=', '.card__underline', '.comp.card')
     ]
     
     for base_url, title_selector, link_selector in sites:
@@ -94,31 +94,33 @@ def get_related_recipes(recipe_title):
                 soup = BeautifulSoup(response.text, 'html.parser')
                 
                 # Find recipe cards/links
-                recipe_elements = soup.select(title_selector)[:2]
+                recipe_elements = soup.select(title_selector)[:5]
                 
                 for element in recipe_elements:
                     title = element.get_text().strip()
                     
                     # Find the link to the recipe
-                    link = ''
-                    if link_selector:
-                        link_element = element.find_parent(link_selector) or element.find(link_selector)
-                        if link_element and link_element.get('href'):
-                            link = link_element['href']
-                            if not link.startswith('http'):
-                                link = urllib.parse.urljoin(base_url, link)
+                    link = element.parent.parent.parent['href']
+                    print(f"link: {link}")
+
+                    # if link_selector:
+                    #     link_element = element.find_parent(link_selector) or element.find(link_selector)
+                    #     if link_element and link_element.get('href'):
+                    #         link = link_element['href']
+                    #         if not link.startswith('http'):
+                    #             link = urllib.parse.urljoin(base_url, link)
                     
                     # Only add if we found a valid title
-                    if title and len(title) > 3:
-                        # Get image from Google
-                        # img_url = get_google_image(title)
+                    # if title and len(title) > 3:
+                    #     # Get image from Google
+                    #     # img_url = get_google_image(title)
                         
-                        related_recipes.append({
-                            'title': title,
-                            # 'image_url': img_url,
-                            'source': base_url.split('.')[1].capitalize(),
-                            'link': link
-                        })
+                    related_recipes.append({
+                        'title': title,
+                        # 'image_url': img_url,
+                        # 'source': base_url.split('.')[1].capitalize(),
+                        'link': link
+                    })
             
             time.sleep(random.uniform(0.5, 1.5))
             
