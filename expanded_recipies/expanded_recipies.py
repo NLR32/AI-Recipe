@@ -100,7 +100,7 @@ def get_related_recipes(recipe_title):
             sources = []
             for i in images:
                 src = i.get("src")
-                if i is not None:
+                if src is not None:
                     sources.append(src)
             
             
@@ -112,7 +112,7 @@ def get_related_recipes(recipe_title):
                 })
             # print(related_recipes)
         
-        time.sleep(random.uniform(0.5, 1.5))
+        # time.sleep(random.uniform(0.5, 1.5))
         
     except Exception as e:
         print(f"Error fetching from {base_url}: {str(e)}")
