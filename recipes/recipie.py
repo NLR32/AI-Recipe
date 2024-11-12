@@ -26,7 +26,7 @@ def index():
 
         # Use the GEMINI API to generate a recipe
         model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(f"Give a recipie using the following ingredients{ingredients}")
+        response = model.generate_content(f"Give a recipie using the following ingredients{ingredients}. Use newline characters to format the response.")
         recipe = response.text
 
         return render_template('index.html', recipe=recipe)
