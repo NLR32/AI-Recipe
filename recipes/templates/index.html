@@ -4,7 +4,7 @@
        <title>AI Recipe Recommendation</title>
        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
    </head>
-   <body>
+   <!-- <body>
        <h1>AI Recipe Recommendation</h1>
        <form method="post">
            <label for="ingredients">Enter the ingredients you have:</label>
@@ -16,5 +16,21 @@
            <h2>Recommended Recipe:</h2>
            <p>{{ recipe }}</p>
        {% endif %}
-   </body>
-   </html>
+   </body> 
+   </html> -->
+
+   <body>
+    <h1>AI Recipe Recommendation</h1>
+    <form method="post">
+        <label for="ingredients">Enter the ingredients you have:</label>
+        <textarea id="ingredients" name="ingredients" rows="3" placeholder="Enter ingredients separated by commas"></textarea>
+        <br>
+        <input type="submit" value="Get Recipe">
+    </form>
+    {% if recipe %}
+        <div class="recipe-container">
+            {{ recipe }}
+        </div>
+    {% endif %}
+</body>
+</html>
