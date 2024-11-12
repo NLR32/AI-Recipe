@@ -107,7 +107,7 @@ def get_related_recipes(recipe_title):
             for i in range(0,min(len(links), len(titles), len(sources))):
                 related_recipes.append({
                     'title': titles[i].text,
-                    'image_url': sources[i],
+                    'img': sources[i],
                     'link': links[i]["href"]
                 })
             # print(related_recipes)
@@ -123,8 +123,7 @@ def get_related_recipes(recipe_title):
         related_recipes = [
             {
                 'title': f"Similar {recipe_title}",
-                'image_url': '/api/placeholder/300/200',
-                'source': 'Suggested Recipe',
+                'img': '/api/placeholder/300/200',
                 'link': '#'
             }
         ]
