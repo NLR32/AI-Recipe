@@ -86,6 +86,9 @@ def get_related_recipes(recipe_title):
     
     for base_url, title_selector, link_selector in sites:
         try:
+            print(f"base url :{base_url}\n")
+            print(f"title selector :{title_selector}\n")
+            print(f"link selector :{link_selector}\n")
             response = requests.get(f"{base_url}{search_query}", headers=headers, timeout=5)
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
