@@ -1,4 +1,3 @@
-# app.py
 import os
 from dotenv import load_dotenv
 from flask import Flask, render_template, request
@@ -29,46 +28,57 @@ credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCO
 # Configure the Gemini API client using the credentials
 genai.configure(api_key=credentials.token)
 
+def validate_image_url(url):
+    """Validate if the image URL is accessible"""
+    try:
+        response = requests.head(url, timeout=5)
+        content_type = response.headers.get('content-type', '')
+        return response.status_code == 200 and 'image' in content_type.lower()
+    except:
+        return False
+
 def get_google_image(query):
-    """Fetch an image URL from Google Custom Search API"""
+    """Fetch an image URL from Google Custom Search API with improved error handling"""
+    fallback_image = f'https://via.placeholder.com/300x200.png?text={urllib.parse.quote(query)}'
+    
+    if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
+        print("Missing Google API credentials")
+        return fallback_image
+        
     try:
         # Add "food" to the query to get more relevant results
         search_query = f"{query} food recipe"
-        url = f"https://www.googleapis.com/customsearch/v1"
+        url = "https://www.googleapis.com/customsearch/v1"
         params = {
             'key': GOOGLE_API_KEY,
             'cx': GOOGLE_CSE_ID,
             'q': search_query,
             'searchType': 'image',
-            'num': 1,
+            'num': 5,  # Request more images in case some fail validation
             'imgSize': 'MEDIUM',
             'safe': 'active'
         }
         
-        response = requests.get(url, params=params)
-        if response.status_code == 200:
-            data = response.json()
-            if 'items' in data and len(data['items']) > 0:
-                return data['items'][0]['link']
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()  # Raise exception for bad status codes
+        
+        data = response.json()
+        if 'items' in data:
+            # Try each image URL until we find a valid one
+            for item in data['items']:
+                image_url = item.get('link')
+                if image_url and validate_image_url(image_url):
+                    return image_url
+        
+        print(f"No valid images found for query: {query}")
+        return fallback_image
+        
+    except requests.exceptions.RequestException as e:
+        print(f"Request error fetching image: {str(e)}")
+        return fallback_image
     except Exception as e:
-        print(f"Error fetching image: {str(e)}")
-    
-    return '/api/placeholder/300/200'
-
-def format_recipe(text):
-    # Extract title from the text (between ## markers)
-    title_pattern = r'##(.*?)##'
-    title_match = re.search(title_pattern, text)
-    title = title_match.group(1).strip() if title_match else "Recipe"
-    
-    # Format the rest of the text
-    formatted_text = re.sub(title_pattern, r'<h1>\1</h1>\n', text)
-    bold_pattern = r'\*\*(.*?)\*\*'
-    formatted_text = re.sub(bold_pattern, r'\n<strong>\1</strong>\n', formatted_text)
-    single_pattern = r'\~(.*?)\~'
-    formatted_text = re.sub(single_pattern, r'\1<br>', formatted_text)
-    
-    return formatted_text, title
+        print(f"Unexpected error fetching image: {str(e)}")
+        return fallback_image
 
 def get_related_recipes(recipe_title):
     headers = {
@@ -125,10 +135,11 @@ def get_related_recipes(recipe_title):
     
     # If we couldn't find any recipes, add some generic ones
     if not related_recipes:
+        fallback_image = f'https://via.placeholder.com/300x200.png?text=Similar+Recipe'
         related_recipes = [
             {
                 'title': f"Similar {recipe_title}",
-                'image_url': '/api/placeholder/300/200',
+                'image_url': fallback_image,
                 'source': 'Suggested Recipe',
                 'link': '#'
             }
