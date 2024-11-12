@@ -44,7 +44,8 @@
 
 import os
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, Markup
+from flask import Flask, render_template, request
+from markupsafe import Markup
 from google.oauth2 import service_account
 import google.generativeai as genai
 import re
