@@ -92,7 +92,7 @@ def index():
         - Title preceded and followed by ##
         - Ingredients section marked with **Ingredients:**
         - Each ingredient preceded and followed by a single ~
-        - Instructions section marked with **Instructions:**
+        - Instructions section marked with **Instructions:**, each instuction preceded and followed by a single ~
         - Tips section marked with **Tips:**"""
         
         response = model.generate_content(prompt)
