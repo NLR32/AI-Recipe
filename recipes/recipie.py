@@ -73,9 +73,9 @@ def format_recipe(text):
     bold_pattern = r'\*\*(.*?)\*\*'
     formatted_text = re.sub(bold_pattern, r'\n<strong>\1</strong>\n', formatted_text)
     
-    # Handle single asterisks (new line after)
-    single_pattern = r'\*(.*?)\*'
-    formatted_text = re.sub(single_pattern, r'\1\n', formatted_text)
+    # Handle single ~ (new line after)
+    single_pattern = r'\~(.*?)\~'
+    formatted_text = re.sub(single_pattern, r'\1<br>', formatted_text)
     
     return formatted_text
 
@@ -91,7 +91,7 @@ def index():
         Format the recipe with:
         - Title preceded and followed by ##
         - Ingredients section marked with **Ingredients:**
-        - Each ingredient preceded by a single *
+        - Each ingredient preceded and followed by a single ~
         - Instructions section marked with **Instructions:**
         - Tips section marked with **Tips:**"""
         
