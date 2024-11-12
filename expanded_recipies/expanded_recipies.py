@@ -101,7 +101,7 @@ def get_related_recipes(recipe_title):
             for i in images:
                 src = i.get("src")
                 if i is not None:
-                    sources.append(i)
+                    sources.append(src)
             
             
             for i in range(0,min(len(links), len(titles), len(sources))):
