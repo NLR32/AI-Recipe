@@ -75,7 +75,7 @@ def format_recipe(text):
     
     # Handle single asterisks (new line after)
     single_pattern = r'\*(.*?)\*'
-    formatted_text = re.sub(single_pattern, r'\1<br>', formatted_text)
+    formatted_text = re.sub(single_pattern, r'\1\n', formatted_text)
     
     return formatted_text
 
