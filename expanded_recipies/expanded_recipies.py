@@ -78,55 +78,44 @@ def get_related_recipes(recipe_title):
     related_recipes = []
     search_query = urllib.parse.quote(f"{recipe_title} recipe")
     
-    sites = [
-        # ('https://www.allrecipes.com/search?q=', '.card__title-text', 'a.card__titleLink'),
-        # ('https://www.food.com/search/', '.title a', 'a.title'),
-        ('https://www.simplyrecipes.com/search?q=', '.card__underline', '.comp.card')
-    ]
-    
-    for base_url, title_selector, link_selector in sites:
-        try:
-            print(f"base url :{base_url}\n")
-            print(f"title selector :{title_selector}\n")
-            print(f"link selector :{link_selector}\n")
-            response = requests.get(f"{base_url}{search_query}", headers=headers, timeout=5)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.text, 'html.parser')
-                
-                # Find recipe cards/links
-                recipe_elements = soup.select(title_selector)[:5]
-                
-                for element in recipe_elements:
-                    title = element.get_text().strip()
-                    
-                    # Find the link to the recipe
-                    link = element.parent.parent.parent['href']
-                    print(f"link: {link}")
+    # sites = [
+    #     ('https://www.allrecipes.com/search?q=', '.card__title-text', 'a.card__titleLink'),
+    #     ('https://www.food.com/search/', '.title a', 'a.title'),
+    #     ('https://www.simplyrecipes.com/search?q=', '.card__title', 'a.card__titleLink')
+    # ]
+    base_url = "https://www.simplyrecipes.com/search?q="
+    # for base_url, title_selector, link_selector in sites:
+    try:
 
-                    # if link_selector:
-                    #     link_element = element.find_parent(link_selector) or element.find(link_selector)
-                    #     if link_element and link_element.get('href'):
-                    #         link = link_element['href']
-                    #         if not link.startswith('http'):
-                    #             link = urllib.parse.urljoin(base_url, link)
-                    
-                    # Only add if we found a valid title
-                    # if title and len(title) > 3:
-                    #     # Get image from Google
-                    #     # img_url = get_google_image(title)
-                        
-                    related_recipes.append({
-                        'title': title,
-                        # 'image_url': img_url,
-                        # 'source': base_url.split('.')[1].capitalize(),
-                        'link': link
-                    })
+        response = requests.get(f"{base_url}{search_query}", headers=headers, timeout=5)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
             
-            time.sleep(random.uniform(0.5, 1.5))
+            # Find recipe cards/links
+            titles = soup.find_all("span", {"class": "card__underline"})
+            links  = soup.find_all("a", {"class": "comp card"})
+            images = soup.find_all("img", {"class": "card__image"})
+
+            # get rid of None's found
+            sources = []
+            for i in images:
+                src = i.get("src")
+                if i is not None:
+                    sources.append(i)
             
-        except Exception as e:
-            print(f"Error fetching from {base_url}: {str(e)}")
-            continue
+            
+            for i in range(0,min(len(links), len(titles), len(sources))):
+                related_recipes.append({
+                    'title': titles[i],
+                    'image_url': sources[i],
+                    'link': links[i]
+                })
+        
+        time.sleep(random.uniform(0.5, 1.5))
+        
+    except Exception as e:
+        print(f"Error fetching from {base_url}: {str(e)}")
+
     
     # If we couldn't find any recipes, add some generic ones
     if not related_recipes:
@@ -139,7 +128,7 @@ def get_related_recipes(recipe_title):
             }
         ]
     
-    return related_recipes[:5]
+    return related_recipes
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
