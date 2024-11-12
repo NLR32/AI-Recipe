@@ -147,6 +147,20 @@ def get_related_recipes(recipe_title):
     
     return related_recipes[:5]
 
+
+def format_recipe(text):
+    # Extract title from the text (between ## markers)
+    title_pattern = r'##(.*?)##'
+    title_match = re.search(title_pattern, text)
+    title = title_match.group(1).strip() if title_match else "Recipe"
+    
+    # Format the rest of the text
+    formatted_text = re.sub(title_pattern, r'<h1>\1</h1>\n', text)
+    bold_pattern = r'\*\*(.*?)\*\*'
+    formatted_text = re.sub(bold_pattern, r'\n<strong>\1</strong>\n', formatted_text)
+    single_pattern = r'\~(.*?)\~'
+    formatted_text = re.sub(single_pattern, r'\1<br>', formatted_text)
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
