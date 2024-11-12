@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Recipe Recommendation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <h1>AI Recipe Recommendation</h1>
+            <form method="post">
+                <label for="ingredients">Enter the ingredients you have:</label>
+                <textarea id="ingredients" name="ingredients" rows="3" placeholder="Enter ingredients separated by commas"></textarea>
+                <br>
+                <input type="submit" value="Get Recipe">
+            </form>
+            {% if recipe %}
+                <div class="recipe-container">
+                    {{ recipe }}
+                </div>
+            {% endif %}
+        </div>
+        
+        {% if related_recipes %}
+        <div class="sidebar">
+            <h2>Related Recipes</h2>
+            <div class="related-recipes">
+                {% for recipe in related_recipes %}
+                <div class="related-recipe-card">
+                    <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
+                    <h3>{{ recipe.title }}</h3>
+                    <p>{{ recipe.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
