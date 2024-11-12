@@ -95,8 +95,8 @@ input[type="submit"]:hover {
 }
 
 .related-recipe-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 10px rgba(0,0,0,0.15);
 }
 
 .recipe-image-container {
