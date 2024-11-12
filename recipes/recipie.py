@@ -66,7 +66,7 @@ genai.configure(api_key=credentials.token)
 
 def format_recipe(text):
     # First, handle the title (## pattern)
-    title_pattern = r'##\s*(.*?)(?=\*)'
+    title_pattern = r'##(.*?)##'
     formatted_text = re.sub(title_pattern, r'<h1>\1</h1>\n', text)
     
     # Handle double asterisks (bold text)
@@ -89,7 +89,7 @@ def index():
         model = genai.GenerativeModel("gemini-1.5-flash")
         prompt = f"""Generate a recipe using these ingredients: {ingredients}. 
         Format the recipe with:
-        - Title preceded by ##
+        - Title preceded and followed by ##
         - Ingredients section marked with **Ingredients:**
         - Each ingredient preceded by a single *
         - Instructions section marked with **Instructions:**
