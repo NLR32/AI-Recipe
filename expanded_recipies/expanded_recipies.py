@@ -106,11 +106,11 @@ def get_related_recipes(recipe_title):
             
             for i in range(0,min(len(links), len(titles), len(sources))):
                 related_recipes.append({
-                    'title': titles[i],
+                    'title': titles[i].text,
                     'image_url': sources[i],
-                    'link': links[i]
+                    'link': links[i]["href"]
                 })
-            print(related_recipes)
+            # print(related_recipes)
         
         time.sleep(random.uniform(0.5, 1.5))
         
