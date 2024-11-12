@@ -27,10 +27,10 @@
             <div class="related-recipes">
                 {% for recipe in related_recipes %}
                 <a href="{{ recipe.link }}" target="_blank" class="related-recipe-card">
-                    <div class="recipe-image-container">
+                    <!-- <div class="recipe-image-container">
                         <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" 
                              onerror="this.src='/api/placeholder/300/200'">
-                    </div>
+                    </div> -->
                     <div class="recipe-card-content">
                         <h3>{{ recipe.title }}</h3>
                         <span class="source-tag">{{ recipe.source }}</span>
