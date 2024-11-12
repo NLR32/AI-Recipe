@@ -10,7 +10,7 @@
             <h1>AI Recipe Recommendation</h1>
             <form method="post">
                 <label for="ingredients">Enter the ingredients you have:</label>
-                <textarea id="ingredients" name="ingredients" rows="3" placeholder="Enter ingredients"></textarea>
+                <textarea id="ingredients" name="ingredients" rows="3" placeholder="Enter ingredients separated by commas"></textarea>
                 <br>
                 <input type="submit" value="Get Recipe">
             </form>
@@ -23,14 +23,19 @@
         
         {% if related_recipes %}
         <div class="sidebar">
-            <h2>Related Recipes</h2>
+            <h2>Similar Recipes</h2>
             <div class="related-recipes">
                 {% for recipe in related_recipes %}
-                <div class="related-recipe-card">
-                    <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
-                    <h3>{{ recipe.title }}</h3>
-                    <p>{{ recipe.description }}</p>
-                </div>
+                <a href="{{ recipe.link }}" target="_blank" class="related-recipe-card">
+                    <div class="recipe-image-container">
+                        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" 
+                             onerror="this.src='/api/placeholder/300/200'">
+                    </div>
+                    <div class="recipe-card-content">
+                        <h3>{{ recipe.title }}</h3>
+                        <span class="source-tag">{{ recipe.source }}</span>
+                    </div>
+                </a>
                 {% endfor %}
             </div>
         </div>

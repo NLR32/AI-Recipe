@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 import urllib.parse
 import time
 import random
+import json
 
 app = Flask(__name__)
 
@@ -19,12 +20,40 @@ load_dotenv("/home/nlrose32/.env")
 
 # Path to the service account key file
 SERVICE_ACCOUNT_FILE = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")  # Custom Search Engine ID
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")  # API Key for Custom Search API
 
 # Authenticate using the JSON key file
 credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE)
 
 # Configure the Gemini API client using the credentials
 genai.configure(api_key=credentials.token)
+
+def get_google_image(query):
+    """Fetch an image URL from Google Custom Search API"""
+    try:
+        # Add "food" to the query to get more relevant results
+        search_query = f"{query} food recipe"
+        url = f"https://www.googleapis.com/customsearch/v1"
+        params = {
+            'key': GOOGLE_API_KEY,
+            'cx': GOOGLE_CSE_ID,
+            'q': search_query,
+            'searchType': 'image',
+            'num': 1,
+            'imgSize': 'MEDIUM',
+            'safe': 'active'
+        }
+        
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            if 'items' in data and len(data['items']) > 0:
+                return data['items'][0]['link']
+    except Exception as e:
+        print(f"Error fetching image: {str(e)}")
+    
+    return '/api/placeholder/300/200'
 
 def format_recipe(text):
     # Extract title from the text (between ## markers)
@@ -42,50 +71,52 @@ def format_recipe(text):
     return formatted_text, title
 
 def get_related_recipes(recipe_title):
-    # Headers to mimic a real browser
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     
-    # Search for similar recipes on food websites
     related_recipes = []
     search_query = urllib.parse.quote(f"{recipe_title} recipe")
     
-    # Try different recipe websites
     sites = [
-        ('https://www.allrecipes.com/search?q=', '.card__title-text', '.card__image img'),
-        ('https://www.food.com/search/', '.title a', '.recipe-image img'),
-        ('https://www.simplyrecipes.com/search?q=', '.card__title', '.card__image img')
+        ('https://www.allrecipes.com/search?q=', '.card__title-text', 'a.card__titleLink'),
+        ('https://www.food.com/search/', '.title a', 'a.title'),
+        ('https://www.simplyrecipes.com/search?q=', '.card__title', 'a.card__titleLink')
     ]
     
-    for base_url, title_selector, img_selector in sites:
+    for base_url, title_selector, link_selector in sites:
         try:
             response = requests.get(f"{base_url}{search_query}", headers=headers, timeout=5)
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
                 
                 # Find recipe cards/links
-                recipe_elements = soup.select(title_selector)[:2]  # Get first 2 recipes from each site
+                recipe_elements = soup.select(title_selector)[:2]
                 
                 for element in recipe_elements:
                     title = element.get_text().strip()
                     
-                    # Try to find an image for the recipe
-                    img_url = '/api/placeholder/300/200'  # Default placeholder
-                    if img_selector:
-                        img_element = soup.select_one(img_selector)
-                        if img_element and img_element.get('src'):
-                            img_url = img_element['src']
+                    # Find the link to the recipe
+                    link = ''
+                    if link_selector:
+                        link_element = element.find_parent(link_selector) or element.find(link_selector)
+                        if link_element and link_element.get('href'):
+                            link = link_element['href']
+                            if not link.startswith('http'):
+                                link = urllib.parse.urljoin(base_url, link)
                     
                     # Only add if we found a valid title
                     if title and len(title) > 3:
+                        # Get image from Google
+                        img_url = get_google_image(title)
+                        
                         related_recipes.append({
                             'title': title,
                             'image_url': img_url,
-                            'source': base_url.split('.')[1].capitalize()
+                            'source': base_url.split('.')[1].capitalize(),
+                            'link': link
                         })
             
-            # Add a small delay between requests to be polite
             time.sleep(random.uniform(0.5, 1.5))
             
         except Exception as e:
@@ -98,19 +129,18 @@ def get_related_recipes(recipe_title):
             {
                 'title': f"Similar {recipe_title}",
                 'image_url': '/api/placeholder/300/200',
-                'source': 'Suggested Recipe'
+                'source': 'Suggested Recipe',
+                'link': '#'
             }
         ]
     
-    return related_recipes[:5]  # Return up to 5 related recipes
+    return related_recipes[:5]
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        # Get the user-provided ingredients
         ingredients = request.form['ingredients']
 
-        # Use the GEMINI API to generate a recipe
         model = genai.GenerativeModel("gemini-1.5-flash")
         prompt = f"""Generate a recipe using these ingredients: {ingredients}. 
         Format the recipe with:
@@ -126,13 +156,9 @@ def index():
         response = model.generate_content(prompt)
         raw_recipe = response.text
         
-        # Format the recipe and get the title
         formatted_recipe, recipe_title = format_recipe(raw_recipe)
-        
-        # Get related recipes based on the generated title
         related_recipes = get_related_recipes(recipe_title)
         
-        # Mark the formatted recipe as safe HTML
         formatted_recipe = Markup(formatted_recipe)
         
         return render_template('index.html', 
