@@ -91,8 +91,11 @@ def index():
         Format the recipe with:
         - Title preceded and followed by ##
         - Ingredients section marked with **Ingredients:**
+        - Each ingredient being numbered
         - Each ingredient preceded and followed by a single ~
-        - Instructions section marked with **Instructions:**, each instuction preceded and followed by a single ~
+        - Instructions section marked with **Instructions:**, 
+        - Each instuction being numbered
+        - Each instruction preceded and followed by a single ~
         - Tips section marked with **Tips:**"""
         
         response = model.generate_content(prompt)
