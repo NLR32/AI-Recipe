@@ -110,6 +110,7 @@ def get_related_recipes(recipe_title):
                     'image_url': sources[i],
                     'link': links[i]
                 })
+            print(related_recipes)
         
         time.sleep(random.uniform(0.5, 1.5))
         
