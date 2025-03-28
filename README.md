@@ -7,4 +7,4 @@ Running:
 - run python script
 - visit external IP
   
-Currently deployed here: http://35.209.12.161:8080/
+(NO LONGER DEPLOYED) 
