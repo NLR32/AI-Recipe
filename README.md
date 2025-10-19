@@ -3,7 +3,9 @@ Generate a recipe based on your ingredients. Hosted with Google Compute Engine a
 
 Running:
 - open instance
-- $ source venv/bin/activate
+- $ source env/bin/activate
+- (if needed) pip install python-dotenv flask markupsafe google-auth google-generativeai requests beautifulsoup4
+
 - run python script
 - visit external IP
   
